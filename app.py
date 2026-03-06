@@ -19,13 +19,24 @@ from sections import (
 #Configuration de l'apparence globale de l'app
 
 st.set_page_config( 
-    page_title="Data Minig -Magasin",
+    page_title="Projet Marketing a partir de data mining",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 inject_css()
+
+st.markdown("""
+<style>
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 0rem !important;
+    }
+    section[data-testid="stSidebar"] {
+        top: 0 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 data_store = load_data()
 
@@ -81,7 +92,7 @@ with st.sidebar:
     st.markdown(
         "<p style='color:#E1CBB2; font-size:11px;'>"
         "<b>Méthodologie KDD</b><br>"
-        "Dr N'KAYO — 2025"
+        "Logbo Axelle & Camara Massaram"
         "</p>",
         unsafe_allow_html=True
     )
