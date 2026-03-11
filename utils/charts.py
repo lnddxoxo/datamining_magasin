@@ -41,3 +41,30 @@ def style_legend(ax):
         legend.get_frame().set_edgecolor(C_MID)
         for text in legend.get_texts():
             text.set_color(C_DARK)
+
+def info_box(text):
+    import streamlit as st
+    st.markdown(
+        "<div style='background-color:#dce3ea;border-left:4px solid #475E72;"
+        "border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:0.9rem;'>"
+        + text + "</div>",
+        unsafe_allow_html=True
+    )
+
+def success_box(text):
+    import streamlit as st
+    st.markdown(
+        "<div style='background-color:#e8f4e8;border-left:4px solid #2d7a2d;"
+        "border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:0.9rem;'>"
+        + text + "</div>",
+        unsafe_allow_html=True
+    )
+
+def warning_box(text):
+    import streamlit as st
+    st.markdown(
+        "<div style='background-color:#fdf3e3;border-left:4px solid #c8860a;"
+        "border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:0.9rem;'>"
+        + text + "</div>",
+        unsafe_allow_html=True
+    )
