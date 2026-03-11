@@ -12,7 +12,6 @@ from sections import (
     page2_dashboard,
     page3_segmentation,
     page4_classification,
-    page5_prediction,
     page6_recommandations
 )
 
@@ -45,13 +44,10 @@ PAGES = [
     "Dashboard",
     "Segmentation",
     "Classification",
-    "Prédiction",
     "Recommandations"
 ]
 
 # ── Garde la page active en mémoire ──────
-# Sans ça, Streamlit revient toujours
-# sur la page 1 à chaque rechargement
 if "page_active" not in st.session_state:
     st.session_state.page_active = "Données"
 
@@ -78,10 +74,8 @@ with st.sidebar:
             "bar-chart",   # Dashboard
             "diagram-3",   # Segmentation
             "tree",        # Classification
-            "graph-up",    # Prédiction
             "lightbulb"    # Recommandations
         ],
-        # Reprend la page où on était
         default_index = PAGES.index(st.session_state.page_active),
         styles        = {
             "container"        : {"background-color": "#475E72"},
@@ -95,7 +89,6 @@ with st.sidebar:
         }
     )
 
-    # Sauvegarde la page active
     st.session_state.page_active = page
 
     st.markdown("---")
@@ -112,5 +105,4 @@ if   page == "Données"        : page1_donnees.show(data_store)
 elif page == "Dashboard"      : page2_dashboard.show(data_store)
 elif page == "Segmentation"   : page3_segmentation.show(data_store)
 elif page == "Classification" : page4_classification.show(data_store)
-elif page == "Prédiction"     : page5_prediction.show(data_store)
 elif page == "Recommandations": page6_recommandations.show(data_store)
