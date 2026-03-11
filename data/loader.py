@@ -18,6 +18,7 @@ def load_data():
     # Extraction de l'année et du mois depuis Date
     data_store["Year"]  = data_store["Date"].dt.year
     data_store["Month"] = data_store["Date"].dt.month
+    data_store["Quarter"] = data_store["Date"].dt.quarter
     # Création de la variable cible : 1 si objectif atteint, 0 sinon
     data_store["Goal_Reached"] = (data_store["Revenue"] >= data_store["Revenue Goal"]).astype(int)
     return data_store

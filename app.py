@@ -39,7 +39,7 @@ st.markdown("""
 
 data_store = load_data()
 
-# ── Liste des pages — ordre important ────
+# ── Liste des pages ───────────────────────
 PAGES = [
     "Données",
     "Dashboard",
@@ -49,12 +49,11 @@ PAGES = [
     "Recommandations"
 ]
 
-# ── Garde la page active en mémoire ──────
-# Sans ça, Streamlit revient toujours
-# sur la page 1 à chaque rechargement
+# ── Session state ─────────────────────────
 if "page_active" not in st.session_state:
     st.session_state.page_active = "Données"
 
+# ── Sidebar ───────────────────────────────
 with st.sidebar:
     st.markdown(
         """
@@ -74,14 +73,13 @@ with st.sidebar:
         menu_title   = None,
         options      = PAGES,
         icons        = [
-            "table",       # Données
-            "bar-chart",   # Dashboard
-            "diagram-3",   # Segmentation
-            "tree",        # Classification
-            "graph-up",    # Prédiction
-            "lightbulb"    # Recommandations
+            "table",
+            "bar-chart",
+            "diagram-3",
+            "tree",
+            "graph-up",
+            "lightbulb"
         ],
-        # Reprend la page où on était
         default_index = PAGES.index(st.session_state.page_active),
         styles        = {
             "container"        : {"background-color": "#475E72"},
@@ -95,7 +93,6 @@ with st.sidebar:
         }
     )
 
-    # Sauvegarde la page active
     st.session_state.page_active = page
 
     st.markdown("---")
@@ -107,7 +104,7 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-# ── Routing ──────────────────────────────
+# ── Routing ───────────────────────────────
 if   page == "Données"        : page1_donnees.show(data_store)
 elif page == "Dashboard"      : page2_dashboard.show(data_store)
 elif page == "Segmentation"   : page3_segmentation.show(data_store)
