@@ -34,20 +34,18 @@ def show(data_store):
 
     cluster_profiles = st.session_state['cluster_profiles']
 
-    st.markdown("---")
-
     # ============================================================
-    # SECTION 1 — CROISEMENT DES DEUX ANALYSES
+    # SECTION 1 — SYNTHÈSE DES RÉSULTATS
     # ============================================================
-    st.markdown("## Croisement Segmentation × Classification")
+    st.markdown("## Synthèse des résultats")
 
-    info_box(
-        "La segmentation K-Means nous dit <b>qui sont les vendeurs</b>. "
-        "La classification nous dit <b>pourquoi ils atteignent ou non leurs objectifs</b>. "
-        "Ensemble, elles nous donnent les leviers d'action précis pour chaque profil."
+    # Résultats segmentation
+    st.markdown(
+        f"<p style='font-size:11px; font-weight:700; color:{C_MID};"
+        f"text-transform:uppercase; letter-spacing:1px; margin:0 0 10px 0;'>"
+        f"Ce que la Segmentation K-Means nous a appris</p>",
+        unsafe_allow_html=True
     )
-
-    st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
 
     PROFIL_COLORS = {
         "Stars":       {"bg": "#e8f4e8", "border": "#2d7a2d", "header": "#1a5c1a"},
@@ -55,106 +53,140 @@ def show(data_store):
         "accompagner": {"bg": "#fdf3e3", "border": "#c8860a", "header": "#8b5e00"},
     }
 
+    PROFIL_DESC = {
+        "Stars":       "Fort revenu, bonne marge, nombreux clients. Les piliers du magasin.",
+        "Performants": "Bon volume mais résultats irréguliers. Potentiel d'évolution réel.",
+        "accompagner": "Marge la plus élevée mais volume insuffisant. Savent bien vendre, pas assez.",
+    }
+
+    PROFIL_EMOJI = {
+        "Stars": "⭐", "Performants": "📈", "accompagner": "🔧"
+    }
+
     def get_style(nom):
         for key in PROFIL_COLORS:
             if key.lower() in nom.lower():
-                return PROFIL_COLORS[key]
-        return PROFIL_COLORS["accompagner"]
-
-    # Données croisement
-    CROISEMENT = {
-        "Stars": {
-            "kmeans":  "Fort revenu · Bonne marge · Clients nombreux",
-            "classif": "Sales Quantity élevée → le modèle les prédit en succès",
-            "levier":  "Maintenir le volume · Challenges premium · Rôle de mentor",
-            "risque":  "Malgré leur profil, ~52% des journées sans atteindre l'objectif → pas infaillibles",
-            "emoji":   "⭐"
-        },
-        "Performants": {
-            "kmeans":  "Bon volume · Marge correcte · Irréguliers",
-            "classif": "Sales Quantity variable → le modèle hésite, résultats mixtes",
-            "levier":  "Augmenter la régularité du volume · Coaching ciblé · Objectifs progressifs",
-            "risque":  "Proches du profil Stars mais manquent de constance dans le volume journalier",
-            "emoji":   "📈"
-        },
-        "accompagner": {
-            "kmeans":  "Faible revenu · Marge la plus élevée · Peu de clients",
-            "classif": "Sales Quantity trop faible → le modèle les prédit souvent en échec",
-            "levier":  "Augmenter le volume de transactions · Formation · Suivi hebdomadaire",
-            "risque":  "Savent vendre des produits rentables mais ne vendent pas assez pour atteindre les objectifs",
-            "emoji":   "🔧"
-        }
-    }
+                return PROFIL_COLORS[key], key
+        return PROFIL_COLORS["accompagner"], "accompagner"
 
     cols = st.columns(len(cluster_profiles), gap="medium")
     for col, (cluster_id, profil) in zip(cols, cluster_profiles.items()):
-        profil_nom = profil['nom']
-        style = get_style(profil_nom)
+        style, key = get_style(profil['nom'])
         bg_s  = style['bg']
         brd_s = style['border']
         hdr_s = style['header']
-
-        crois_key = "accompagner"
-        for key in CROISEMENT:
-            if key.lower() in profil_nom.lower():
-                crois_key = key
-                break
-        c = CROISEMENT[crois_key]
+        emoji = PROFIL_EMOJI.get(key, "🔧")
+        desc  = PROFIL_DESC.get(key, "")
 
         with col:
             st.markdown(
                 "<div style='background:white; border-radius:12px; padding:16px;"
                 "box-shadow:0 4px 16px rgba(71,94,114,0.1);"
                 "border-top:5px solid " + brd_s + ";'>"
-
-                "<p style='font-size:13px; font-weight:700; color:" + brd_s + ";"
-                "margin:0 0 4px 0;'>" + c['emoji'] + " " + profil_nom + "</p>"
-                "<p style='font-size:10px; color:" + C_MID + "; margin:0 0 12px 0;'>"
-                + str(profil['nb_vendeurs']) + " vendeurs · Cluster " + str(cluster_id) + "</p>"
-
-                "<p style='font-size:10px; font-weight:700; color:" + C_MID + ";"
-                "text-transform:uppercase; letter-spacing:1px; margin:0 0 4px 0;'>K-Means</p>"
-                "<p style='font-size:11px; color:" + C_DARK + "; margin:0 0 10px 0;'>"
-                + c['kmeans'] + "</p>"
-
-                "<p style='font-size:10px; font-weight:700; color:" + C_MID + ";"
-                "text-transform:uppercase; letter-spacing:1px; margin:0 0 4px 0;'>Classification</p>"
-                "<p style='font-size:11px; color:" + C_DARK + "; margin:0 0 10px 0;'>"
-                + c['classif'] + "</p>"
-
-                "<div style='background:" + bg_s + "; border-left:3px solid " + brd_s + ";"
-                "border-radius:4px; padding:6px 10px; margin-bottom:8px;'>"
-                "<p style='font-size:10px; font-weight:700; color:" + hdr_s + "; margin:0 0 2px 0;'>Levier principal</p>"
-                "<p style='font-size:10px; color:" + C_DARK + "; margin:0;'>" + c['levier'] + "</p>"
-                "</div>"
-
-                "<div style='background:#fff5f5; border-left:3px solid #e74c3c;"
-                "border-radius:4px; padding:6px 10px;'>"
-                "<p style='font-size:10px; font-weight:700; color:#c0392b; margin:0 0 2px 0;'>Point de vigilance</p>"
-                "<p style='font-size:10px; color:" + C_DARK + "; margin:0;'>" + c['risque'] + "</p>"
-                "</div>"
-
+                "<p style='font-size:13px; font-weight:700; color:" + brd_s + "; margin:0 0 2px 0;'>"
+                + emoji + " " + profil['nom'] + "</p>"
+                "<p style='font-size:10px; color:" + C_MID + "; margin:0 0 10px 0;'>"
+                + str(profil['nb_vendeurs']) + " vendeurs</p>"
+                "<hr style='border-color:" + C_LIGHT + "; margin:8px 0;'>"
+                "<p style='font-size:11px; color:" + C_DARK + "; margin:4px 0;'>"
+                "💰 <b>" + f"{profil['revenue']:,.0f}" + " EUR</b>/jour</p>"
+                "<p style='font-size:11px; color:" + C_DARK + "; margin:4px 0;'>"
+                "📊 <b>" + f"{profil['margin']*100:.1f}" + "%</b> marge</p>"
+                "<p style='font-size:11px; color:" + C_DARK + "; margin:4px 0;'>"
+                "🎯 <b>" + f"{profil['goal_reached']*100:.1f}" + "%</b> objectifs</p>"
+                "<hr style='border-color:" + C_LIGHT + "; margin:8px 0;'>"
+                "<p style='font-size:10px; color:" + C_MID + "; font-style:italic; margin:0;'>"
+                + desc + "</p>"
                 "</div>",
                 unsafe_allow_html=True
             )
 
+    st.markdown("<div style='margin-top:20px'></div>", unsafe_allow_html=True)
+
+    # Résultats classification
+    st.markdown(
+        f"<p style='font-size:11px; font-weight:700; color:{C_MID};"
+        f"text-transform:uppercase; letter-spacing:1px; margin:0 0 10px 0;'>"
+        f"Ce que la Classification nous a appris</p>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"<div style='background:white; border-radius:12px; padding:20px;"
+        f"box-shadow:0 4px 16px rgba(71,94,114,0.1); border-left:5px solid {C_DARK};'>"
+
+        f"<p style='font-size:13px; color:{C_DARK}; margin:0 0 14px 0;'>"
+        f"L'arbre de décision a été entraîné sur <b>41 629 journées de vente</b> "
+        f"pour prédire si un vendeur va atteindre son objectif. "
+        f"Avec une accuracy de <b>~80%</b>, le modèle identifie clairement "
+        f"les deux variables qui déterminent le succès :</p>"
+
+        f"<div style='display:flex; gap:12px;'></div>",
+        unsafe_allow_html=True
+    )
+
+    col1, col2 = st.columns(2, gap="medium")
+    with col1:
+        st.markdown(
+            f"<div style='background:{C_BG}; border-radius:10px; padding:14px;"
+            f"border-left:4px solid {C_DARK};'>"
+            f"<p style='font-size:22px; font-weight:900; color:{C_DARK}; margin:0;'>🥇 Sales Quantity</p>"
+            f"<p style='font-size:12px; color:{C_MID}; margin:4px 0 8px 0;'>Variable n°1 — ~60% de la décision</p>"
+            f"<p style='font-size:11px; color:{C_DARK}; margin:0;'>"
+            f"Le <b>volume de transactions journalières</b> est le meilleur prédicteur. "
+            f"Un vendeur qui vend beaucoup génère mécaniquement plus de revenu "
+            f"et se rapproche de son objectif.</p>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+    with col2:
+        st.markdown(
+            f"<div style='background:{C_BG}; border-radius:10px; padding:14px;"
+            f"border-left:4px solid {C_WARM};'>"
+            f"<p style='font-size:22px; font-weight:900; color:{C_DARK}; margin:0;'>🥈 Revenue</p>"
+            f"<p style='font-size:12px; color:{C_MID}; margin:4px 0 8px 0;'>Variable n°2 — ~30% de la décision</p>"
+            f"<p style='font-size:11px; color:{C_DARK}; margin:0;'>"
+            f"À volume égal, c'est la <b>valeur des ventes</b> qui fait la différence. "
+            f"Les vendeurs qui concluent des ventes à prix élevé atteignent "
+            f"plus facilement leurs objectifs.</p>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
+
+    success_box(
+        "En combinant les deux analyses : les vendeurs <b>À accompagner</b> ont une bonne marge "
+        "mais un <b>Sales Quantity trop faible</b> — c'est précisément ce que la classification "
+        "identifie comme cause d'échec. Les <b>Stars</b> excellent sur les deux dimensions. "
+        "Les <b>Performants</b> manquent de régularité dans le volume."
+    )
+
     st.markdown("---")
 
     # ============================================================
-    # SECTION 2 — PLAN D'ACTION TRIMESTRIEL
+    # SECTION 2 — RECOMMANDATIONS PAR PROFIL
     # ============================================================
-    st.markdown("## Plan d'action trimestriel par profil")
+    st.markdown("## Recommandations par profil")
+
+    info_box(
+        "Chaque recommandation est ancrée sur les résultats des deux analyses. "
+        "Le plan sur <b>3 mois</b> cible les leviers identifiés par la segmentation et la classification."
+    )
+
+    st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
 
     PLANS = {
         "Stars": {
             "emoji": "⭐",
+            "synthese": "Fort sur les deux dimensions — volume ET valeur. Objectif : les retenir et capitaliser sur leur expertise.",
             "mois": [
                 {
                     "titre": "Mois 1 — Reconnaissance",
                     "objectif": "Renforcer l'engagement",
                     "actions": [
-                        "Mettre en place un programme de bonus et awards mensuels",
-                        "Réunion individuelle de valorisation des résultats",
+                        "Programme de bonus et awards mensuels",
+                        "Réunion individuelle de valorisation",
                         "Identifier les Stars prêts à devenir mentors",
                     ]
                 },
@@ -162,8 +194,8 @@ def show(data_store):
                     "titre": "Mois 2 — Responsabilité",
                     "objectif": "Capitaliser sur leur expertise",
                     "actions": [
-                        "Lancer le mentorat vers les vendeurs À accompagner",
-                        "Impliquer dans les décisions stratégiques du département",
+                        "Lancer le mentorat vers les À accompagner",
+                        "Impliquer dans les décisions stratégiques",
                         "Objectifs premium avec incentives exclusifs",
                     ]
                 },
@@ -171,108 +203,113 @@ def show(data_store):
                     "titre": "Mois 3 — Fidélisation",
                     "objectif": "Ancrer sur le long terme",
                     "actions": [
-                        "Présenter un plan de carrière individualisé",
-                        "Évaluer l'impact du mentorat sur les autres groupes",
+                        "Plan de carrière individualisé",
+                        "Évaluer l'impact du mentorat",
                         "Mesurer taux de rétention et satisfaction",
                     ]
                 }
             ],
-            "kpis": ["Taux de rétention", "Taux d'atteinte objectifs premium", "Nb vendeurs mentorés avec progression"]
+            "kpis": ["Taux de rétention", "Taux objectifs premium", "Nb vendeurs mentorés en progression"]
         },
         "Performants": {
             "emoji": "📈",
+            "synthese": "Bon volume mais irrégulier — la classification montre que leur Sales Quantity fluctue. Objectif : gagner en constance.",
             "mois": [
                 {
                     "titre": "Mois 1 — Diagnostic",
-                    "objectif": "Identifier les freins au volume",
+                    "objectif": "Comprendre les journées en échec",
                     "actions": [
-                        "Analyser les journées en échec : volume ou valeur ?",
-                        "Sessions de coaching individuelles sur la régularité",
+                        "Analyser les jours où le volume baisse",
+                        "Coaching individuel sur la régularité",
                         "Binômage avec un vendeur Star",
                     ]
                 },
                 {
                     "titre": "Mois 2 — Formation",
-                    "objectif": "Développer la constance",
+                    "objectif": "Développer la constance du volume",
                     "actions": [
-                        "Formation sur les techniques de vente avancées",
-                        "Partage de bonnes pratiques Stars en réunion d'équipe",
-                        "Objectifs de volume progressifs avec suivi hebdomadaire",
+                        "Formation techniques de vente avancées",
+                        "Partage bonnes pratiques Stars",
+                        "Objectifs de volume progressifs",
                     ]
                 },
                 {
                     "titre": "Mois 3 — Évaluation",
                     "objectif": "Mesurer et ajuster",
                     "actions": [
-                        "Comparer le taux Goal_Reached avant/après",
-                        "Identifier les Performants proches du profil Stars",
-                        "Revoir les objectifs selon la progression réelle",
+                        "Comparer Sales Quantity avant/après",
+                        "Identifier les Performants proches Stars",
+                        "Revoir les objectifs selon progression",
                     ]
                 }
             ],
-            "kpis": ["Évolution taux Goal_Reached", "Progression Sales Quantity mensuelle", "Nb Performants passés Stars"]
+            "kpis": ["Régularité Sales Quantity", "Évolution taux Goal_Reached", "Nb Performants passés Stars"]
         },
         "accompagner": {
             "emoji": "🔧",
+            "synthese": "Marge élevée mais Sales Quantity trop faible — la classification prédit l'échec sur ce seul critère. Objectif : augmenter le volume sans sacrifier la qualité.",
             "mois": [
                 {
                     "titre": "Mois 1 — Stabilisation",
-                    "objectif": "Comprendre et poser les bases",
+                    "objectif": "Comprendre les blocages du volume",
                     "actions": [
-                        "Entretien individuel pour identifier les blocages",
-                        "Réviser les objectifs pour les rendre atteignables",
-                        "Formation produit et techniques fondamentales",
+                        "Entretien individuel sur les freins",
+                        "Réviser les objectifs à la hausse progressive",
+                        "Formation produit et techniques de base",
                     ]
                 },
                 {
                     "titre": "Mois 2 — Accompagnement",
                     "objectif": "Augmenter le volume de transactions",
                     "actions": [
-                        "Points hebdomadaires avec le manager direct",
+                        "Points hebdomadaires avec le manager",
                         "Parrainage par un vendeur Star",
-                        "Challenges de volume avec récompenses immédiates",
+                        "Challenges de volume avec récompenses",
                     ]
                 },
                 {
                     "titre": "Mois 3 — Mesure",
-                    "objectif": "Évaluer et décider",
+                    "objectif": "Évaluer la progression",
                     "actions": [
-                        "Comparer Sales Quantity et Goal_Reached avant/après",
+                        "Comparer Sales Quantity avant/après",
+                        "Mesurer évolution Goal_Reached",
                         "Identifier les vendeurs prêts à passer Performants",
-                        "Ajuster le plan pour ceux encore en difficulté",
                     ]
                 }
             ],
-            "kpis": ["Progression Sales Quantity", "Évolution taux Goal_Reached", "Revenu moyen mois/mois"]
+            "kpis": ["Progression Sales Quantity", "Évolution Goal_Reached", "Revenu moyen mois/mois"]
         }
     }
 
     for cluster_id, profil in cluster_profiles.items():
         profil_nom = profil['nom']
-        style  = get_style(profil_nom)
-        bg_s   = style['bg']
-        brd_s  = style['border']
-        hdr_s  = style['header']
+        style, key = get_style(profil_nom)
+        bg_s  = style['bg']
+        brd_s = style['border']
+        hdr_s = style['header']
 
         plan_key = "accompagner"
-        for key in PLANS:
-            if key.lower() in profil_nom.lower():
-                plan_key = key
+        for k in PLANS:
+            if k.lower() in profil_nom.lower():
+                plan_key = k
                 break
         plan = PLANS[plan_key]
 
-        # Bandeau profil
+        # Bandeau profil + synthèse
         st.markdown(
-            "<div style='background:white; border-radius:10px; padding:14px 18px;"
-            "box-shadow:0 2px 8px rgba(71,94,114,0.08); margin-bottom:12px;"
-            "border-left:5px solid " + brd_s + ";'>"
-            "<span style='font-size:14px; font-weight:700; color:" + brd_s + ";'>"
-            + plan['emoji'] + " " + profil_nom + "</span>"
-            "<span style='font-size:11px; color:" + C_MID + "; margin-left:12px;'>"
+            f"<div style='background:white; border-radius:12px; padding:16px 20px;"
+            f"box-shadow:0 4px 16px rgba(71,94,114,0.1); margin-bottom:12px;"
+            f"border-left:5px solid " + brd_s + ";'>"
+            f"<p style='font-size:14px; font-weight:700; color:" + brd_s + "; margin:0 0 4px 0;'>"
+            + plan['emoji'] + " " + profil_nom +
+            f"<span style='font-size:11px; color:{C_MID}; font-weight:400; margin-left:12px;'>"
             + str(profil['nb_vendeurs']) + " vendeurs · "
             + f"Revenu moy. {profil['revenue']:,.0f} EUR · "
-            + f"Taux objectif {profil['goal_reached']*100:.1f}%"
-            + "</span></div>",
+            + f"Goal_Reached {profil['goal_reached']*100:.1f}%"
+            + "</span></p>"
+            f"<p style='font-size:11px; color:{C_DARK}; margin:0; font-style:italic;'>"
+            + plan['synthese'] +
+            "</p></div>",
             unsafe_allow_html=True
         )
 
@@ -281,33 +318,32 @@ def show(data_store):
         for col, mois in zip([col1, col2, col3], plan['mois']):
             with col:
                 actions_html = "".join([
-                    "<li style='margin-bottom:4px;'>" + a + "</li>"
+                    "<li style='margin-bottom:5px;'>" + a + "</li>"
                     for a in mois['actions']
                 ])
                 st.markdown(
                     "<div style='background:white; border-radius:10px; padding:14px;"
-                    "box-shadow:0 2px 8px rgba(71,94,114,0.08); height:100%;"
+                    "box-shadow:0 2px 8px rgba(71,94,114,0.08);"
                     "border-top:3px solid " + brd_s + ";'>"
-                    "<p style='font-size:11px; font-weight:700; color:" + brd_s + ";"
-                    "margin:0 0 2px 0;'>" + mois['titre'] + "</p>"
-                    "<p style='font-size:10px; color:" + C_MID + "; font-style:italic;"
-                    "margin:0 0 10px 0;'>Objectif : " + mois['objectif'] + "</p>"
-                    "<ul style='margin:0; padding-left:16px; color:" + C_DARK + ";"
-                    "font-size:10px; line-height:1.7;'>"
+                    "<p style='font-size:11px; font-weight:700; color:" + brd_s + "; margin:0 0 2px 0;'>"
+                    + mois['titre'] + "</p>"
+                    "<p style='font-size:10px; color:" + C_MID + "; font-style:italic; margin:0 0 10px 0;'>"
+                    "🎯 " + mois['objectif'] + "</p>"
+                    "<ul style='margin:0; padding-left:16px; color:" + C_DARK + "; font-size:10px; line-height:1.8;'>"
                     + actions_html +
                     "</ul></div>",
                     unsafe_allow_html=True
                 )
 
         # KPIs
-        st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)
         kpi_cols = st.columns(len(plan['kpis']), gap="small")
         for kpi_col, kpi in zip(kpi_cols, plan['kpis']):
             with kpi_col:
                 st.markdown(
                     "<div style='background:" + bg_s + "; border:1px solid " + brd_s + ";"
-                    "border-radius:6px; padding:6px 10px; font-size:10px; text-align:center;"
-                    "color:" + hdr_s + ";'>"
+                    "border-radius:6px; padding:6px 10px; font-size:10px;"
+                    "text-align:center; color:" + hdr_s + ";'>"
                     "📍 <b>" + kpi + "</b></div>",
                     unsafe_allow_html=True
                 )
@@ -320,28 +356,24 @@ def show(data_store):
     st.markdown("## Synthèse exportable")
 
     info_box(
-        "Tableau récapitulatif de chaque vendeur avec son profil, "
-        "sa stratégie et ses indicateurs clés. Téléchargeable en CSV."
+        "Tableau récapitulatif par vendeur avec profil, stratégie et indicateurs clés."
     )
 
     STRATEGIES = {
         "Stars":       "Fidéliser et valoriser",
-        "Performants": "Développer la constance",
+        "Performants": "Développer la constance du volume",
         "accompagner": "Accompagnement renforcé sur le volume",
     }
 
     synthese_rows = []
     for cluster_id, profil in cluster_profiles.items():
-        strat_key = "accompagner"
-        for key in STRATEGIES:
-            if key.lower() in profil['nom'].lower():
-                strat_key = key
-                break
+        style, key = get_style(profil['nom'])
+        strat = STRATEGIES.get(key, STRATEGIES["accompagner"])
         for vendeur in profil['vendeurs']:
             synthese_rows.append({
                 'Vendeur':           vendeur,
                 'Profil':            profil['nom'],
-                'Stratégie':         STRATEGIES[strat_key],
+                'Stratégie':         strat,
                 'Revenu moy. (EUR)': round(profil['revenue'], 2),
                 'Marge moy.':        f"{profil['margin']*100:.1f}%",
                 'Taux objectif':     f"{profil['goal_reached']*100:.1f}%",

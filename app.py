@@ -12,7 +12,6 @@ from sections import (
     page2_dashboard,
     page3_segmentation,
     page4_classification,
-    page5_prediction,
     page6_recommandations
 )
 
@@ -45,7 +44,6 @@ PAGES = [
     "Dashboard",
     "Segmentation",
     "Classification",
-    "Prédiction",
     "Recommandations"
 ]
 
@@ -109,5 +107,4 @@ if   page == "Données"        : page1_donnees.show(data_store)
 elif page == "Dashboard"      : page2_dashboard.show(data_store)
 elif page == "Segmentation"   : page3_segmentation.show(data_store)
 elif page == "Classification" : page4_classification.show(data_store)
-elif page == "Prédiction"     : page5_prediction.show(data_store)
 elif page == "Recommandations": page6_recommandations.show(data_store)
