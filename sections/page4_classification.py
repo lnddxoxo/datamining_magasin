@@ -585,51 +585,41 @@ def show(data_store):
 
     st.markdown("<div style='margin-top:20px'></div>", unsafe_allow_html=True)
 
-    # ── Conclusion bloc 4.4 ──────────────
     st.markdown("### Interprétation des Résultats")
 
     col_c1, col_c2 = st.columns(2)
     with col_c1:
-        st.metric(label=f"🥇 Variable n°1 — {top_feature}", value=f"{top_val}%", help="Part dans la décision du modèle")
+        st.metric(label=f"🥇 Variable n°1 — {top_feature}", value=f"{top_val}%")
     with col_c2:
-        st.metric(label=f"🥈 Variable n°2 — {sec_feature}", value=f"{sec_val}%", help="Part dans la décision du modèle")
+        st.metric(label=f"🥈 Variable n°2 — {sec_feature}", value=f"{sec_val}%")
 
     st.markdown("<div style='margin-top:8px'></div>", unsafe_allow_html=True)
 
     st.info(
         f"🛒 **{top_feature} — Le volume de ventes détermine le succès**\n\n"
         f"C'est le nombre de ventes réalisées dans la journée qui prédit le mieux "
-        f"si un vendeur va atteindre son objectif. Un vendeur actif qui conclut "
-        f"beaucoup de transactions génère mécaniquement un chiffre d'affaires plus élevé "
-        f"— et se rapproche ainsi de son objectif journalier."
+        f"si un vendeur va atteindre son objectif."
     )
 
     st.info(
         f"💰 **{sec_feature} — La valeur des ventes affine la prédiction**\n\n"
         f"À volume de transactions égal, c'est le vendeur qui génère le plus de chiffre "
-        f"d'affaires qui atteint son objectif. Cela distingue les vendeurs qui savent "
-        f"conclure des ventes de valeur élevée de ceux qui multiplient les petites transactions."
+        f"d'affaires qui atteint son objectif."
     )
 
     st.info(
-        f"🎯 **Conclusion — Ce que le modèle nous dit sur l'atteinte des objectifs**\n\n"
+        f"🎯 **Conclusion**\n\n"
         f"Sur {len(y_test):,} journées testées, le modèle prédit correctement "
-        f"**{acc_test}%** des cas. Cela signifie que l'activité commerciale d'un vendeur "
-        f"— combien il vend et combien il génère — suffit à prédire avec fiabilité "
-        f"s'il va atteindre son objectif, sans avoir besoin de connaître l'objectif lui-même."
+        f"**{acc_test}%** des cas."
     )
 
     st.warning(
-        f"⚠️ **À noter — Chaque vendeur est ancré dans son département**\n\n"
-        f"Chaque vendeur est affecté à un seul département sur toute la période 2017–2022. "
-        f"Un vendeur Électroménager vend moins d'unités mais à prix plus élevé qu'un vendeur "
-        f"Accessoires — leurs objectifs sont fixés en conséquence. "
-        f"Le volume de ventes n'est donc pas comparable entre deux vendeurs de départements différents : "
-        f"c'est la performance relative à son propre contexte qui compte."
+        f"⚠️ **À noter**\n\n"
+        f"Chaque vendeur est affecté à un seul département. "
+        f"Le volume de ventes n'est pas comparable entre départements différents."
     )
 
     st.markdown("---")
-
 
     # ════════════════════════════════════════
     # BLOC 4.5 — PRÉDICTION INTERACTIVE
@@ -646,8 +636,6 @@ def show(data_store):
     mean_margin    = round(float(df["Margin"].mean()), 3)
     mean_qty       = round(float(df["Sales Quantity"].mean()), 0)
     mean_customers = round(float(df["Customers"].mean()), 0)
-
-    st.markdown("<div style='margin-top:12px'></div>", unsafe_allow_html=True)
 
     col_s1, col_s2 = st.columns(2)
 
@@ -683,8 +671,6 @@ def show(data_store):
             step=1
         )
 
-    st.markdown("<div style='margin-top:16px'></div>", unsafe_allow_html=True)
-
     input_data = [[input_revenue, input_margin, input_qty, input_customers]]
     prediction = model.predict(input_data)[0]
     proba      = model.predict_proba(input_data)[0]
@@ -693,15 +679,11 @@ def show(data_store):
 
     if prediction == 1:
         st.success(
-            f"✅ **Objectif atteint**\n\n"
-            f"Avec ces chiffres, le modèle prédit que le vendeur **va atteindre** "
-            f"son objectif journalier — avec une probabilité de **{proba_oui}%**."
+            f"✅ **Objectif atteint** — probabilité de **{proba_oui}%**."
         )
     else:
         st.error(
-            f"❌ **Objectif non atteint**\n\n"
-            f"Avec ces chiffres, le modèle prédit que le vendeur **ne va pas atteindre** "
-            f"son objectif journalier — avec une probabilité de **{proba_non}%**."
+            f"❌ **Objectif non atteint** — probabilité de **{proba_non}%**."
         )
 
     col_p1, col_p2 = st.columns(2)
@@ -711,10 +693,5 @@ def show(data_store):
         st.metric("Probabilité — Objectif Non Atteint", f"{proba_non}%")
 
     st.warning(
-        "⚠️ **Limite du modèle**\n\n"
-        "Cette prédiction est basée sur les patterns historiques 2017–2022. "
-        "Le modèle ne connaît pas l'objectif individuel fixé au vendeur — "
-        "deux vendeurs avec les mêmes chiffres mais des objectifs différents "
-        "peuvent avoir des résultats réels opposés. "
-        f"La fiabilité globale du modèle est de **{acc_test}%**."
+        f"⚠️ **Limite du modèle** — fiabilité globale : **{acc_test}%**."
     )
